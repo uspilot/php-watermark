@@ -32,6 +32,7 @@ class Watermark
     private string $marker;
     private int $markerType;
     private WatermarkCommandBuilderInterface $commandBuilder;
+    private string $executablePath = '';
 
     private array $options = [
         'position' => 'Center',
@@ -54,6 +55,13 @@ class Watermark
         $this->commandBuilder = CommandBuilderFactory::getCommandBuilder($source);
     }
 
+    public function setExecutablePath($path = ''):self
+    {
+        if (!empty($path) && mb_substr($path,-1,1) != '/') $path .= '/';
+        $this->executablePath = $path;
+
+        return $this;
+    }
     public function withText(string $text): self
     {
         $this->marker = $text;
@@ -98,7 +106,7 @@ class Watermark
     public function write(?string $outputPath = null): bool
     {
         $output = $returnCode = null;
-        exec($this->getCommand($outputPath), $output, $returnCode);
+        exec($this->executablePath.$this->getCommand($outputPath), $output, $returnCode);
 
         return empty($output) && $returnCode === 0;
     }
